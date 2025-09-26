@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fast_zero.schemas import Message, UserSchema, UserList, UserPublic, UserDB
 from http import HTTPStatus
 
@@ -29,6 +29,11 @@ def read_users():
 @app.put("/users/{user_id}", status_code=HTTPStatus.OK, response_model=UserPublic)
 def update_user(user_id: int, user: UserSchema):
     user_with_id = UserDB(**user.model_dump(), id=user_id)
+
+    if user_id < 1 or user_id > len(database):
+        raise HTTPException(
+            detail="Usuário não encontrado", status_code=HTTPStatus.NOT_FOUND
+        )
 
     database[user_id - 1] = user_with_id
 
